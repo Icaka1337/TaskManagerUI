@@ -19,7 +19,24 @@ namespace TaskManagerUI.Controllers
             _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", JwtToken);
         }
 
-        public IActionResult Index()
+        public IActionResult Index(int page = 1)
+        {
+            PageResultViewModel<TaskViewModel> pagedResult = new PageResultViewModel<TaskViewModel>();
+            HttpResponseMessage response = _client.GetAsync($"{_client.BaseAddress}/Tasks?page={page}&pageSize=15").Result;
+
+            if (response.IsSuccessStatusCode)
+            {
+                string data = response.Content.ReadAsStringAsync().Result;
+                pagedResult = JsonConvert.DeserializeObject<PageResultViewModel<TaskViewModel>>(data);
+            }
+            else
+            {
+                Console.WriteLine($"Request failed with status code: {response.StatusCode}");
+            }
+            return View(pagedResult);
+        }
+
+        /*public IActionResult Index()
         {
             List<TaskViewModel> tasks = new List<TaskViewModel>();
             HttpResponseMessage response = _client.GetAsync(_client.BaseAddress + "/Tasks").Result;
@@ -34,7 +51,7 @@ namespace TaskManagerUI.Controllers
                 Console.WriteLine($"Request failed with status code: {response.StatusCode}");
             }
             return View(tasks);
-        }
+        }*/
 
         [HttpGet]
         public IActionResult Create()

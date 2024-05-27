@@ -21,22 +21,21 @@ namespace TaskManagerUI.Controllers
         }
 
         [HttpGet]
-        public IActionResult Index()
+        public IActionResult Index(int page = 1)
         {
-            List<ProjectViewModel> projects = new List<ProjectViewModel>();
-
-            HttpResponseMessage response = _client.GetAsync(_client.BaseAddress + "/Projects").Result;
+            PageResultViewModel<ProjectViewModel> pagedResult = new PageResultViewModel<ProjectViewModel>();
+            HttpResponseMessage response = _client.GetAsync($"{_client.BaseAddress}/Projects?page={page}&pageSize=15").Result;
 
             if (response.IsSuccessStatusCode)
             {
                 string data = response.Content.ReadAsStringAsync().Result;
-                projects = JsonConvert.DeserializeObject<List<ProjectViewModel>>(data);
+                pagedResult = JsonConvert.DeserializeObject<PageResultViewModel<ProjectViewModel>>(data);
             }
             else
             {
                 Console.WriteLine($"Request failed with status code: {response.StatusCode}");
             }
-            return View(projects);
+            return View(pagedResult);
         }
 
         [HttpGet]
