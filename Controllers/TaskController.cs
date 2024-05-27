@@ -4,39 +4,36 @@ using System.Net.Http.Headers;
 using System.Text;
 using TaskManagerUI.Models;
 
-
 namespace TaskManagerUI.Controllers
 {
-    public class ProjectController : Controller
+    public class TaskController : Controller
     {
         private readonly Uri _baseAddress = new Uri("https://localhost:7293/api");
         private readonly HttpClient _client;
         private string JwtToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6InRlc3QyIiwibmFtZWlkIjoiMjAwMyIsIm5iZiI6MTcxNjgzMjI1MywiZXhwIjoxNzE2ODc1NDUzLCJpYXQiOjE3MTY4MzIyNTN9.pe9dFVwolOIQiE3nI7A-urOF78UU8gl7ejE5vvENyWE";
 
-        public ProjectController()
+        public TaskController()
         {
             _client = new HttpClient();
             _client.BaseAddress = _baseAddress;
             _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", JwtToken);
         }
 
-        [HttpGet]
         public IActionResult Index()
         {
-            List<ProjectViewModel> projects = new List<ProjectViewModel>();
-
-            HttpResponseMessage response = _client.GetAsync(_client.BaseAddress + "/Projects").Result;
+            List<TaskViewModel> tasks = new List<TaskViewModel>();
+            HttpResponseMessage response = _client.GetAsync(_client.BaseAddress + "/Tasks").Result;
 
             if (response.IsSuccessStatusCode)
             {
                 string data = response.Content.ReadAsStringAsync().Result;
-                projects = JsonConvert.DeserializeObject<List<ProjectViewModel>>(data);
+                tasks = JsonConvert.DeserializeObject<List<TaskViewModel>>(data);
             }
             else
             {
                 Console.WriteLine($"Request failed with status code: {response.StatusCode}");
             }
-            return View(projects);
+            return View(tasks);
         }
 
         [HttpGet]
@@ -46,21 +43,20 @@ namespace TaskManagerUI.Controllers
         }
 
         [HttpPost]
-        public IActionResult Create(ProjectViewModel project)
+        public IActionResult Create(TaskViewModel task)
         {
             try
             {
-                if (project == null)
+                if (task == null)
                 {
                     return View("Error");
                 }
-                project.Tasks = new List<TaskViewModel>();
-                string data = JsonConvert.SerializeObject(project);
+                string data = JsonConvert.SerializeObject(task);
                 StringContent content = new StringContent(data, Encoding.UTF8, "application/json");
-                HttpResponseMessage reponse = _client.PostAsync(_client.BaseAddress + "/Projects/PostProject", content).Result;
+                HttpResponseMessage reponse = _client.PostAsync(_client.BaseAddress + "/Tasks/PostTask", content).Result;
                 if (reponse.IsSuccessStatusCode)
                 {
-                    TempData["successMessage"] = "Project Created.";
+                    TempData["successMessage"] = "Task Created.";
                     return RedirectToAction("Index");
                 }
             }
@@ -77,18 +73,19 @@ namespace TaskManagerUI.Controllers
         {
             try
             {
-                ProjectViewModel project = new ProjectViewModel();
-                project.Id = id;
-                project.Tasks = new List<TaskViewModel>();
-                HttpResponseMessage response = _client.GetAsync(_client.BaseAddress + $"/Projects/{id}").Result;
+                TaskViewModel task = new TaskViewModel();
+                task.Id = id;
+                task.UserTasks = new List<UserTaskViewModel>();
+                task.Project= new ProjectViewModel();
+                HttpResponseMessage response = _client.GetAsync(_client.BaseAddress + $"/Tasks/{id}").Result;
 
                 if (response.IsSuccessStatusCode)
                 {
                     string data = response.Content.ReadAsStringAsync().Result;
-                    project = JsonConvert.DeserializeObject<ProjectViewModel>(data);
+                    task = JsonConvert.DeserializeObject<TaskViewModel>(data);
                 }
 
-                return View(project);
+                return View(task);
             }
             catch (Exception e)
             {
@@ -98,19 +95,17 @@ namespace TaskManagerUI.Controllers
         }
 
         [HttpPost]
-        public IActionResult Edit(ProjectViewModel model)
+        public IActionResult Edit(TaskViewModel model)
         {
             try
             {
-                model.Id = model.Id;
-                model.Tasks = new List<TaskViewModel>();
                 string data = JsonConvert.SerializeObject(model);
                 StringContent content = new StringContent(data, Encoding.UTF8, "application/json");
-                HttpResponseMessage response = _client.PutAsync(_client.BaseAddress + $"/Projects/{model.Id}", content).Result;
+                HttpResponseMessage response = _client.PutAsync(_client.BaseAddress + $"/Tasks/{model.Id}", content).Result;
 
                 if (response.IsSuccessStatusCode)
                 {
-                    TempData["successMessage"] = "Project details updated.";
+                    TempData["successMessage"] = "Task details updated.";
                     return RedirectToAction("Index");
                 }
             }
@@ -128,16 +123,16 @@ namespace TaskManagerUI.Controllers
         {
             try
             {
-                ProjectViewModel project = new ProjectViewModel();
-                HttpResponseMessage response = _client.GetAsync(_client.BaseAddress + $"/Projects/{id}").Result;
+                TaskViewModel task = new TaskViewModel();
+                HttpResponseMessage response = _client.GetAsync(_client.BaseAddress + $"/Tasks/{id}").Result;
 
                 if (response.IsSuccessStatusCode)
                 {
                     string data = response.Content.ReadAsStringAsync().Result;
-                    project = JsonConvert.DeserializeObject<ProjectViewModel>(data);
+                    task = JsonConvert.DeserializeObject<TaskViewModel>(data);
                 }
 
-                return View(project);
+                return View(task);
             }
             catch (Exception e)
             {
@@ -151,11 +146,11 @@ namespace TaskManagerUI.Controllers
         {
             try
             {
-                HttpResponseMessage response = _client.DeleteAsync(_client.BaseAddress + $"/Projects/{id}").Result;
+                HttpResponseMessage response = _client.DeleteAsync(_client.BaseAddress + $"/Tasks/{id}").Result;
 
                 if (response.IsSuccessStatusCode)
                 {
-                    TempData["successMessage"] = "Project deleted.";
+                    TempData["successMessage"] = "Task deleted.";
                     return RedirectToAction("Index");
                 }
             }
@@ -167,24 +162,5 @@ namespace TaskManagerUI.Controllers
 
             return View();
         }
-
-        [HttpGet]
-           public IActionResult Search(string name)
-           {
-               List<ProjectViewModel> projects = new List<ProjectViewModel>();
-
-               HttpResponseMessage response = _client.GetAsync(_client.BaseAddress + $"/Projects/{name}").Result;
-
-               if (response.IsSuccessStatusCode)
-               {
-                   string data = response.Content.ReadAsStringAsync().Result;
-                   projects = JsonConvert.DeserializeObject<List<ProjectViewModel>>(data);
-               }
-               else
-               {
-                   Console.WriteLine($"Request failed with status code: {response.StatusCode}");
-               }
-               return View(projects);
-           }
     }
 }

@@ -1,10 +1,10 @@
-﻿@model IEnumerable<TaskManagerUI.Models.ProjectViewModel>
+﻿@model IEnumerable<TaskManagerUI.Models.TaskViewModel>
 
 @{
     ViewData["Title"] = "Index";
 }
 
-<h1>Projects</h1>
+<h1>Tasks</h1>
 
 <p>
     <a asp-action="Create" class="btn btn-outline-primary mt-2">Create New</a>
@@ -16,19 +16,16 @@
                 @Html.DisplayNameFor(model => model.Id)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Name)
+                @Html.DisplayNameFor(model => model.Title)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.Description)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.StartDate)
+                @Html.DisplayNameFor(model => model.Status)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.EndDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Budget)
+                @Html.DisplayNameFor(model => model.ProjectId)
             </th>
             <th></th>
         </tr>
@@ -41,24 +38,21 @@
                     @Html.DisplayFor(modelItem => item.Id)
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.Name)
+                    @Html.DisplayFor(modelItem => item.Title)
                 </td>
                 <td>
                     @Html.DisplayFor(modelItem => item.Description)
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.StartDate)
+                    @Html.DisplayFor(modelItem => item.Status)
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.EndDate)
+                    @Html.DisplayFor(modelItem => item.ProjectId)
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.Budget)
-                </td>
-                <td>
-                    @Html.ActionLink("Edit", "Edit", new { id = item.Id }, new {@class = "btn btn-outline-primary"}) |
-                    @Html.ActionLink("Tasks", "Tasks", new { id = item.Id }, new {@class = "btn btn-outline-success"}) |
-                    @Html.ActionLink("Delete", "Delete", new { id = item.Id }, new {@class = "btn btn-outline-danger"})
+                    @Html.ActionLink("Edit", "Edit", new { id=item.Id }, new {@class = "btn btn-outline-primary"}) |
+                    @Html.ActionLink("Assigned To", "AssignedTo", new { id=item.Id }, new {@class = "btn btn-outline-success"}) |
+                    @Html.ActionLink("Delete", "Delete", new { id=item.Id }, new {@class = "btn btn-outline-danger"})
                 </td>
             </tr>
         }
